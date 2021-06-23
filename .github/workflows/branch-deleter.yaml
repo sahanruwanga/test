@@ -1,0 +1,19 @@
+name: Branch Deleter
+
+on:
+  pull_request:
+    types: [ closed ]
+
+  # Allows to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build:
+    # Check whether the PR was authored by 'sahanruwanga'
+    if: github.event.pull_request.head.repo.owner.login == 'sahanruwanga'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Delete PR Branch for Hotfix delivery
+        run: git push -d origin ${{ github.event.pull_request.head.ref }}
+        
