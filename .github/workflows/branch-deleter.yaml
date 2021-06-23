@@ -10,7 +10,7 @@ on:
 jobs:
   delete-branch:
     # Check whether the PR was authored by 'sahanruwanga'
-    if: github.event.pull_request.head.repo.owner.login == 'sahanruwanga'
+    if: github.event.pull_request.head.repo.owner.login == 'sahanruwang'
     runs-on: ubuntu-latest
 
     steps:
