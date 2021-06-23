@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  delete-branch:
     # Check whether the PR was authored by 'sahanruwanga'
     if: github.event.pull_request.head.repo.owner.login == 'sahanruwanga'
     runs-on: ubuntu-latest
