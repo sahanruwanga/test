@@ -15,8 +15,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
 
       - name: Delete PR Branch for Hotfix delivery
         run: git push -d origin ${{ github.event.pull_request.head.ref }}
