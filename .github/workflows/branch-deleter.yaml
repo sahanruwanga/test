@@ -1,0 +1,72 @@
+name: Branch Creator
+
+on:
+#   pull_request:
+#     types: [ closed ]
+
+  # Allows to run this workflow manually from the Actions tab
+  workflow_dispatch:
+    inputs:
+        # Take the version as an input which contain bugs.
+        bug_version:
+          # The label that displays for the developer.
+          description: 'Enter the version that needs a hotfix (e.g. 0.1.0).'
+          # Make it a mandatory input.
+          required: true
+
+jobs:
+  create-branch:
+    # Check whether the PR was authored by 'sahanruwanga'
+#     if: github.event.pull_request.head.repo.owner.login == 'sahanruwang'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Repo
+        id: checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Create the new branch
+        run: |
+          git config --global user.email ""
+          git config --global user.name "sahanruwanga"
+  
+          # Read the input value for the version.
+          echo "Read the input value for the version."
+          VERSION=${{ github.event.inputs.bug_version }}
+          # Remove the prefix 'v' from the version input (if it has).
+          VERSION_WITHOUT_V=${VERSION#v}
+          echo "Version without 'v': ${VERSION_WITHOUT_V}"
+          # Append the prefix 'v' to the version.
+          VERSION="v"$VERSION_WITHOUT_V
+          echo "Required version to be fixed: ${VERSION}"
+
+          # Check whether the provided version is available and stop the workflow if not.
+          echo "Check whether the provided version is available."
+          IS_TAG_EXIST=$(git tag -l ${VERSION} | wc -l)
+          if [ $IS_TAG_EXIST -eq 0 ]; then
+            echo "Provided version is not available!"
+            exit 1
+          fi
+
+          # Check whether the required branch is already available and stop the workflow if it is already available.
+          echo "Check whether the required branch is already there."
+          IS_BRANCH_EXIST=$(git ls-remote --heads origin hotfix-${VERSION_WITHOUT_V} | wc -l)
+          if [ $IS_BRANCH_EXIST -eq 1 ]; then
+            echo "Required branch is already exist!"
+            exit 1
+          fi
+
+          # Create the new branch based from the given version.
+          echo "Create the new branch for the fix - hotfix-${VERSION_WITHOUT_V}."
+          git checkout -b hotfix-${VERSION_WITHOUT_V} ${VERSION}
+          
+          rm -rf .github/
+          
+          # Add only modified files and commit changes.
+          echo "Add only modified files."
+          git add -u
+          echo "Commit changes and push to the new branch."
+          git commit -m "Creating a new branch for the Hotfix delivery - ${VERSION_WITHOUT_V}."
+          git push origin hotfix-${VERSION_WITHOUT_V}
